@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% include 'components/head.html' %}
+    <title>User Profile</title>
+  </head>
+  <body>
+    {% include 'components/navbar.html' %}
+    <div class="container p-3">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="text-center mb-3 d-flex justify-content-center">
+            <img
+              src="{{ user_profile_image }}"
+              alt="Profile Image"
+              class="rounded-circle"
+              style="width: 200px; height: 200px; object-fit: cover"
+            />
+          </div>
+          <div class="text-center">
+            <form
+              method="POST"
+              action="/edit_profile_image"
+              enctype="multipart/form-data"
+            >
+              <div class="d-grid">
+                <input
+                  type="file"
+                  name="profileImage"
+                  accept="image/*"
+                  style="display: none"
+                  id="uploadImage"
+                  onchange="document.getElementById('submitImage').click();"
+                />
+                <label for="uploadImage" class="btn btn-primary"
+                  >Edit Image</label
+                >
+                <button
+                  type="submit"
+                  class="btn btn-success"
+                  style="display: none"
+                  id="submitImage"
+                >
+                  Save Image
+                </button>
+              </div>
+            </form>
+            <form method="POST" action="/delete_profile_image">
+              <div class="d-grid py-1">
+                <button type="submit" class="btn btn-danger mt-2">
+                  Delete Image
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="col-md-7 ms-auto pt-2 pt-md-0">
+          <form method="POST" action="/edit_profile">
+            <div class="mb-3">
+              <label for="inputName" class="form-label">Full Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="inputName"
+                name="fullName"
+                value="{{ user_full_name }}"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="inputEmail" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="inputEmail"
+                name="email"
+                value="{{ user_email }}"
+                disabled
+              />
+            </div>
+            <div class="mb-3">
+              <label for="inputAddress" class="form-label">Address</label>
+              <textarea
+                class="form-control"
+                id="inputAddress"
+                name="address"
+                required
+              >
+{{ user_address }}</textarea
+              >
+            </div>
+            <div class="mb-3">
+              <label for="inputWhatsApp" class="form-label"
+                >WhatsApp Number</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="inputWhatsApp"
+                name="whatsApp"
+                value="{{ user_whatsapp }}"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="inputProvince" class="form-label">Province</label>
+              <select
+                class="form-select"
+                id="inputProvince"
+                name="province"
+                required
+              >
+                <option value="" disabled selected>Select your province</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="inputCity" class="form-label">City</label>
+              <select class="form-select" id="inputCity" name="city" required>
+                <option value="" disabled selected>Select your city</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="inputDistrict" class="form-label">District</label>
+              <select
+                class="form-select"
+                id="inputDistrict"
+                name="district"
+                required
+              >
+                <option value="" disabled selected>Select your district</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="inputVillage" class="form-label">Village</label>
+              <select
+                class="form-select"
+                id="inputVillage"
+                name="village"
+                required
+              >
+                <option value="" disabled selected>Select your village</option>
+              </select>
+            </div>
+            {% if is_premium_user() %}
+            <div class="mb-3 d-flex">
+              <img
+                src="{{ url_for('static', filename='asset/premium.png') }}"
+                alt="premium"
+                class="button-icon"
+              />
+              <p id="premiumExpires" data-expires="{{ user_premium_expires }}">
+                Premium Expires: {{ user_premium_expires }}
+              </p>
+            </div>
+            {% endif %}
+            <div class="d-grid py-1">
+              <button type="submit" class="btn btn-primary">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% include 'components/footer.html' %} {% include 'components/scripts.html'
+    %}
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const provinceSelect = document.getElementById("inputProvince");
+        const citySelect = document.getElementById("inputCity");
+        const districtSelect = document.getElementById("inputDistrict");
+        const villageSelect = document.getElementById("inputVillage");
+
+        // Fetch data for provinces and populate provinceSelect
+        fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
+          .then((response) => response.json())
+          .then((data) => {
+            data.forEach((province) => {
+              const option = document.createElement("option");
+              option.value = province.id;
+              option.textContent = province.name;
+              provinceSelect.appendChild(option);
+            });
+
+            // Select previously selected province if available
+            provinceSelect.value = "{{ user_province }}"; // Replace with actual value
+            provinceSelect.dispatchEvent(new Event("change")); // Trigger change event
+          })
+          .catch((error) =>
+            console.error("Error fetching province data:", error)
+          );
+
+        // Event listener for provinceSelect change
+        provinceSelect.addEventListener("change", function () {
+          const selectedProvinceId = provinceSelect.value;
+
+          // Fetch data for cities/regencies based on selected province
+          fetch(
+            `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${selectedProvinceId}.json`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              citySelect.innerHTML =
+                '<option value="" disabled selected>Select your city</option>';
+              data.forEach((city) => {
+                const option = document.createElement("option");
+                option.value = city.id;
+                option.textContent = city.name;
+                citySelect.appendChild(option);
+              });
+
+              // Select previously selected city if available
+              citySelect.value = "{{ user_city }}"; // Replace with actual value
+              citySelect.dispatchEvent(new Event("change")); // Trigger change event
+            })
+            .catch((error) =>
+              console.error("Error fetching city data:", error)
+            );
+        });
+
+        // Event listener for citySelect change
+        citySelect.addEventListener("change", function () {
+          const selectedCityId = citySelect.value;
+
+          // Fetch data for districts based on selected city
+          fetch(
+            `https://www.emsifa.com/api-wilayah-indonesia/api/districts/${selectedCityId}.json`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              districtSelect.innerHTML =
+                '<option value="" disabled selected>Select your district</option>';
+              data.forEach((district) => {
+                const option = document.createElement("option");
+                option.value = district.id;
+                option.textContent = district.name;
+                districtSelect.appendChild(option);
+              });
+
+              // Select previously selected district if available
+              districtSelect.value = "{{ user_district }}"; // Replace with actual value
+              districtSelect.dispatchEvent(new Event("change")); // Trigger change event
+            })
+            .catch((error) =>
+              console.error("Error fetching district data:", error)
+            );
+        });
+
+        // Event listener for districtSelect change
+        districtSelect.addEventListener("change", function () {
+          const selectedDistrictId = districtSelect.value;
+
+          // Fetch data for villages based on selected district
+          fetch(
+            `https://www.emsifa.com/api-wilayah-indonesia/api/villages/${selectedDistrictId}.json`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              villageSelect.innerHTML =
+                '<option value="" disabled selected>Select your village</option>';
+              data.forEach((village) => {
+                const option = document.createElement("option");
+                option.value = village.id;
+                option.textContent = village.name;
+                villageSelect.appendChild(option);
+              });
+
+              // Select previously selected village if available
+              villageSelect.value = "{{ user_village }}"; // Replace with actual value
+            })
+            .catch((error) =>
+              console.error("Error fetching village data:", error)
+            );
+        });
+        // Format premium expiration date
+        const premiumExpiresElement = document.getElementById("premiumExpires");
+        const expiresISO = premiumExpiresElement.getAttribute("data-expires");
+        const expiresDate = new Date(expiresISO);
+        const formattedExpires = ` Premium Expires: ${expiresDate.getDate()} ${getMonthName(
+          expiresDate.getMonth()
+        )} ${expiresDate.getFullYear()} pukul ${formatTime(
+          expiresDate.getHours(),
+          expiresDate.getMinutes(),
+          expiresDate.getSeconds()
+        )}`;
+        premiumExpiresElement.textContent = formattedExpires;
+      });
+
+      // Function to get month name
+      function getMonthName(monthIndex) {
+        const monthNames = [
+          "Januari",
+          "Februari",
+          "Maret",
+          "April",
+          "Mei",
+          "Juni",
+          "Juli",
+          "Agustus",
+          "September",
+          "Oktober",
+          "November",
+          "Desember",
+        ];
+        return monthNames[monthIndex];
+      }
+
+      // Function to format time (add leading zeros)
+      function formatTime(hours, minutes, seconds) {
+        return `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      }
+    </script>
+  </body>
+</html>

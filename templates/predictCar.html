@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include 'components/head.html' %}
+    <title>Prediksi Harga Mobil Bekas</title>
+  </head>
+  <body>
+    {% include 'components/navbar.html' %}
+    <div class="container p-3">
+      <h1 class="text-center">Detect Car Model</h1>
+      {% if not predicted_brand %}
+      <form
+        id="uploadForm"
+        method="post"
+        action="/predict_car_brand"
+        enctype="multipart/form-data"
+      >
+        <div class="mb-5 d-flex align-content-center justify-content-center">
+          <label for="imageFile" id="drop-area">
+            <input
+              required
+              type="file"
+              class="custom-file-input"
+              id="imageFile"
+              name="file"
+              hidden
+              accept=".jpg, .jpeg, .png"
+              aria-describedby="inputGroupFileAddon"
+            />
+            <div id="img-view">
+              <img src="https://cdn-icons-png.freepik.com/512/68/68857.png" />
+              <p>
+                Drag and Drop or click here<br />
+                to upload image
+              </p>
+              <span> Upload any images from desktop</span>
+            </div>
+          </label>
+        </div>
+        {% if predict_error %}
+        <div class="input-group-append d-flex justify-content-center">
+          <div
+            class="alert alert-danger alert-dismissible fade show"
+            style="width: 500px"
+            role="alert"
+          >
+            {{ predict_error }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+        </div>
+        {% endif %}
+        <div class="input-group-append d-flex justify-content-center mb-3">
+          <button type="submit" class="btn btn-primary" style="width: 500px">
+            Predict
+          </button>
+        </div>
+      </form>
+      {% if prediction_quota is defined %} {% if prediction_quota >= 0 %}
+      <p class="text-center">
+        Remaining image prediction quota: {{ prediction_quota }}
+      </p>
+      {% else %}
+      <p class="text-center">You have unlimited prediction quota.</p>
+      {% endif %} {% endif %} {% endif %} {% if predicted_brand %}
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">
+            Predicted Car Result : {{ predicted_brand }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <div>
+            <p>Car Listing:</p>
+            <div id="carList" class="row">
+              {% if car_list %} {% for car in car_list %}
+              <div class="card col-md-2 col-6">
+                {% if car.imageURLs and car.imageURLs|length > 0 %}
+                <img
+                  src="{{ car.imageURLs[0] }}"
+                  class="card-img-top"
+                  alt="Car Image"
+                />
+                {% else %}
+                <img
+                  src="https://img.freepik.com/premium-vector/modern-flat-icon-landscape_203633-11062.jpg?w=740"
+                  class="card-img-top"
+                  alt="No Image"
+                />
+                {% endif %}
+                <div class="card-body">
+                  <h5 class="card-title">{{ car.model }}</h5>
+                  <p class="card-text">Rp {{ car.carPrice }}</p>
+                  <a href="/carListings/{{ car.id }}" class="btn btn-primary"
+                    >See Detail</a
+                  >
+                </div>
+              </div>
+              {% endfor %} {% else %}
+              <!-- Show dotLottie animation when no data -->
+              <div class="d-flex justify-content-center">
+                <dotlottie-player
+                  src="/static/json/no-data.json"
+                  background="transparent"
+                  speed="1"
+                  style="width: 200px; height: 200px"
+                  loop
+                  autoplay
+                ></dotlottie-player>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if sentiment_data %}
+      <div class="sentiment-list">
+        <div class="card">
+          <div
+            class="card-header d-md-flex d-block w-100 justify-content-between py-3"
+          >
+            <h5>Public Opinion:</h5>
+            {% if session.user %}
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#inputSentimentModal"
+            >
+              Add
+            </button>
+            {% endif %}
+          </div>
+
+          <div class="card sentiment-item mb-3">
+            <!-- <div class="mb-3 d-md-flex d-block justify-content-between">
+              <p>Sentimen Positif: {{ sentiment_counts['positif'] }}</p>
+              <p>Sentimen Netral: {{ sentiment_counts['netral'] }}</p>
+              <p>Sentimen Negatif: {{ sentiment_counts['negatif'] }}</p>
+            </div> -->
+            <div class="row">
+              <div class="col-lg-8 order-lg-1 order-2">
+                {% for item in sentiment_data %}
+
+                <div class="card sentiment-item mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">{{ item['author'] }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                      {{ item['published_at'] }}
+                    </h6>
+                    <p class="card-text">{{ item['text'] }}</p>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="col-lg-4 order-lg-2 order-1">
+                <div
+                  class="d-flex justify-content-center align-items-center"
+                  style="width: 100%; height: 100%"
+                >
+                  <canvas
+                    id="sentimentPieChart"
+                    width="400"
+                    height="400"
+                  ></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Pagination controls -->
+      <div class="pagination">
+        {% if page > 1 %}
+        <a
+          class="page-link"
+          href="{{ url_for('show_sentiment_data', page=page-1) }}"
+          >Previous</a
+        >
+        {% endif %} {% for p in range(1, (total // per_page) + 2) %}
+        <a
+          class="page-link {% if p == page %}active{% endif %}"
+          href="{{ url_for('show_sentiment_data', page=p) }}"
+          >{{ p }}</a
+        >
+        {% endfor %} {% if page < (total // per_page) + 1 %}
+        <a
+          class="page-link"
+          href="{{ url_for('show_sentiment_data', page=page+1) }}"
+          >Next</a
+        >
+        {% endif %}
+      </div>
+      {% endif %} {% endif %}
+    </div>
+    {% include 'components/footer.html' %} {% include 'components/scripts.html'
+    %}
+
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="inputSentimentModal"
+      tabindex="-1"
+      aria-labelledby="inputSentimentModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="inputSentimentModalLabel">
+              Share your experience about {{ predicted_brand }}
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <!-- Form for sentiment input -->
+            <form id="sentimentForm" method="post" action="/predict_sentiment">
+              <div class="mb-3">
+                <textarea
+                  class="form-control"
+                  id="sentimentText"
+                  name="sentiment"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+            <!-- Display sentiment prediction result -->
+            <div id="sentimentPredictionResult" style="margin-top: 20px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const dropArea = document.getElementById("drop-area");
+      const inputFile = document.getElementById("imageFile");
+      const imageView = document.getElementById("img-view");
+
+      inputFile.addEventListener("change", uploadImage);
+
+      function uploadImage() {
+        let imgLink = URL.createObjectURL(inputFile.files[0]);
+        imageView.style.backgroundImage = `url(${imgLink})`;
+        imageView.innerHTML = ""; // Kosongkan teks di dalam div
+        imageView.style.border = 0;
+      }
+
+      dropArea.addEventListener("dragover", function (e) {
+        e.preventDefault();
+      });
+
+      dropArea.addEventListener("drop", function (e) {
+        e.preventDefault();
+        inputFile.files = e.dataTransfer.files;
+        uploadImage(); // Panggil fungsi uploadImage setelah gambar diunggah
+      });
+    </script>
+    <script>
+      {% if sentiment_counts %}
+      const sentimentCounts = {{ sentiment_counts | tojson }};
+      const ctx = document.getElementById('sentimentPieChart').getContext('2d');
+
+      const data = {
+        labels: ['Positif', 'Netral', 'Negatif'],
+        datasets: [{
+          data: [sentimentCounts['positif'], sentimentCounts['netral'], sentimentCounts['negatif']],
+          backgroundColor: ['#4caf50', '#ffeb3b', '#f44336'],
+        }]
+      };
+
+      const config = {
+        type: 'pie',
+        data: data,
+      };
+
+      const sentimentPieChart = new Chart(ctx, config);
+      {% endif %}
+    </script>
+  </body>
+</html>

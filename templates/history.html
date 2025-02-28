@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include 'components/head.html' %}
+    <title>History</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.8/lottie.min.js"
+      rel="stylesheet"
+    />
+    <style>
+      .no-data-animation {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh; /* Adjust height as needed */
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    {% include 'components/navbar.html' %}
+    <div class="container p-3">
+      <h1>History</h1>
+      {% if prediction_history %}
+      <div class="list-group">
+        {% for prediction in prediction_history %}
+        <a
+          href="{{ url_for('history_detail', prediction_id=prediction['id']) }}"
+          class="list-group-item list-group-item-action"
+        >
+          <div class="d-flex w-100 justify-content-between">
+            <strong class="mb-1"
+              >{{ prediction.features['model'] }} {{
+              prediction.features['tahun'] }}</strong
+            >
+            <small>{{ prediction.timestamp }}</small>
+          </div>
+          <p class="mb-1">
+            <strong>Prediction Value:</strong>
+            <span class="prediction-value">{{ prediction.prediction[0] }}</span>
+          </p>
+          <form
+            action="{{ url_for('delete_prediction', prediction_id=prediction.id) }}"
+            method="post"
+            onsubmit="return confirm('Are you sure you want to delete this prediction?')"
+          >
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="no-data-animation">
+        <dotlottie-player
+          src="/static/json/no-data.json"
+          background="transparent"
+          speed="1"
+          style="width: 300px; height: 300px"
+          loop
+          autoplay
+        ></dotlottie-player>
+      </div>
+      {% endif %}
+    </div>
+    {% include 'components/footer.html' %} {% include 'components/scripts.html'
+    %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.8/lottie.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Format semua nilai prediksi sebagai Rupiah
+        $(".prediction-value").each(function () {
+          let predictionValue = parseFloat(
+            $(this)
+              .text()
+              .replace(/[\[\]]/g, "")
+          );
+          if (!isNaN(predictionValue)) {
+            let rupiah = new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+            }).format(predictionValue);
+            $(this).text(rupiah);
+          } else {
+            $(this).text("Invalid prediction value");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,143 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <script
+        src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs"
+        type="module"
+      ></script>
+      <dotlottie-player
+        src="/static/json/Animation - 1718721023346.json"
+        background="transparent"
+        speed="1"
+        style="width: 70px; height: 70px"
+        loop
+        autoplay
+      ></dotlottie-player>
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">Home</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Let's Detect
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="/predictPrice">Price Detection</a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a class="dropdown-item" href="/predictCar">Car Detection</a>
+            </li>
+          </ul>
+        </li>
+        {% if session.user %}
+        <li class="nav-item">
+          <a class="nav-link" href="/history">History Detect</a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a class="nav-link" href="/carListing">Car Listing</a>
+        </li>
+      </ul>
+      <div class="d-flex align-items-center">
+        {% if session.user %} {% set full_name = get_full_name() %}
+        <span class="me-2 text-truncate" style="max-width: 200px"
+          >{{ full_name if full_name else session.user }}</span
+        >
+        {% if is_premium_user() %}
+        <img
+          src="{{ url_for('static', filename='asset/premium.png') }}"
+          alt="premium"
+          class="button-icon"
+        />
+        {% endif %}
+        <div class="vr mx-2" style="height: 32px"></div>
+        <div class="dropdown">
+          <a
+            class="nav-link dropdown-toggle d-flex align-items-center"
+            href="#"
+            role="button"
+            id="dropdownMenuLink"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <img
+              src="{{ get_profile_image() }}"
+              alt="Profile Image"
+              class="rounded-circle"
+              style="width: 32px; height: 32px; object-fit: cover"
+            />
+          </a>
+          <ul
+            class="dropdown-menu dropdown-menu-lg-end dropdown-menu-sm-start"
+            aria-labelledby="dropdownMenuLink"
+          >
+            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+            <li>
+              <a
+                class="dropdown-item"
+                href="#"
+                data-bs-toggle="modal"
+                data-bs-target="#logoutModal"
+                >Logout</a
+              >
+            </li>
+          </ul>
+        </div>
+        {% else %}
+        <a href="/login" class="btn btn-success" type="button">Login</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Logout Confirmation Modal -->
+<div
+  class="modal fade"
+  id="logoutModal"
+  tabindex="-1"
+  aria-labelledby="logoutModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">Are you sure you want to log out?</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <a href="/logout" class="btn btn-danger">Logout</a>
+      </div>
+    </div>
+  </div>
+</div>

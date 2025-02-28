@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include 'components/head.html' %}
+    <title>Prediction Detail</title>
+  </head>
+  <body>
+    {% include 'components/navbar.html' %}
+    <div class="container p-3">
+      <h1>{{ prediction.features['model'] }} {{ prediction.features['tahun'] }}</h1>
+      <div class="card">
+        <div class="card-body">
+          <p class="card-text">
+            <strong>Features:</strong> 
+            <ul>
+              <li>Model: {{ prediction.features['model'] }}</li>
+              <li>Tahun: {{ prediction.features['tahun'] }}</li>
+              <li>Kilometer: {{ prediction.features['kilometer'] }}</li>
+              <li>Pajak: {{ prediction.features['pajak'] }}</li>
+              <li>KM/L: {{ prediction.features['kmPerL'] }}</li>
+              <li>CC: {{ prediction.features['cc'] }}</li>
+              <li>Transmisi: {{ prediction.features['transmisi'] }}</li>
+              <li>Bahan Bakar: {{ prediction.features['bahan_bakar'] }}</li>
+            </ul>
+          </p>
+          <p class="card-text">
+            <strong>Prediction Value:</strong> 
+            <span class="prediction-value">{{ prediction.prediction[0] }}</span>
+          </p>
+          <p class="card-text">
+            <strong>Timestamp:</strong> {{ prediction.timestamp }}
+          </p>
+        </div>
+      </div>
+    </div>
+    {% include 'components/footer.html' %} {% include 'components/scripts.html'
+    %}
+    <script>
+      $(document).ready(function () {
+        // Format semua nilai prediksi sebagai Rupiah
+        $(".prediction-value").each(function () {
+          let predictionValue = parseFloat(
+            $(this)
+              .text()
+              .replace(/[\[\]]/g, "")
+          );
+          if (!isNaN(predictionValue)) {
+            let rupiah = new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+            }).format(predictionValue);
+            $(this).text(rupiah);
+          } else {
+            $(this).text("Invalid prediction value");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

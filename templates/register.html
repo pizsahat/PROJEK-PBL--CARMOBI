@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% include 'components/head.html' %}
+    <title>Register Page</title>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row" style="height: 100vh">
+        <div
+          class="col-md-6 d-flex align-items-center justify-content-center bg-danger p-2 text-white bg-opacity-75 rounded-end-5"
+        >
+          <div class="container py-4 px-4">
+            <div class="row">
+              <h1>Register</h1>
+              {% if register_error %}
+              <div
+                class="alert alert-danger alert-dismissible fade show"
+                role="alert"
+              >
+                {{ register_error }}
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                  aria-label="Close"
+                ></button>
+              </div>
+              {% endif %}
+              <form action="/register" method="POST">
+                <div class="input-group mb-3">
+                  <input
+                    type="email"
+                    class="form-control"
+                    placeholder="Email Address"
+                    aria-label="email"
+                    id="email"
+                    name="email"
+                  />
+                </div>
+                <div class="input-group mb-3">
+                  <input
+                    type="password"
+                    class="form-control"
+                    placeholder="Password"
+                    aria-label="Password"
+                    id="password"
+                    name="password"
+                  />
+                </div>
+                <div class="d-grid py-2">
+                  <button
+                    type="submit"
+                    value="Register"
+                    class="btn btn-primary"
+                  >
+                    Register
+                  </button>
+                </div>
+                <div class="py-2">
+                  <a href="/login" class="text-white">Already have account?</a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 d-none d-md-flex justify-content-center">
+          <div class="container">
+            <dotlottie-player
+              src="https://lottie.host/36d6a03d-f5b7-4901-9da6-4af4291d5fc8/YQTIcuBKht.json"
+              background="transparent"
+              speed="1"
+              style="width: 100%; height: 100%"
+              loop
+              autoplay
+            ></dotlottie-player>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="verificationModal"
+      tabindex="-1"
+      aria-labelledby="verificationModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="verificationModalLabel">
+              Verify Your Email
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            A verification email has been sent to your email address. Please
+            check your inbox and verify your email before logging in.
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+              id="closeModalButtonFooter"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include 'components/scripts.html' %}
+
+    <!-- Hidden input field to indicate registration success -->
+    <input
+      type="hidden"
+      id="registrationSuccess"
+      value="{{ 'true' if registration_success else 'false' }}"
+    />
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM fully loaded and parsed");
+        var registrationSuccess =
+          document.getElementById("registrationSuccess").value === "true";
+        if (registrationSuccess) {
+          console.log("Registration successful, showing modal");
+          var verificationModal = new bootstrap.Modal(
+            document.getElementById("verificationModal"),
+            {
+              keyboard: false,
+            }
+          );
+          verificationModal.show();
+          // Add event listeners for modal close buttons
+          var closeModalButtons = document.querySelectorAll(
+            "#closeModalButton, #closeModalButtonFooter"
+          );
+          closeModalButtons.forEach((button) => {
+            button.addEventListener("click", function () {
+              window.location.href = "/login";
+            });
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

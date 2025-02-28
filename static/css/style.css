@@ -1,0 +1,162 @@
+html,
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+}
+
+.carousel-item {
+  height: 100%;
+}
+
+.carousel-item img {
+  height: 300px;
+  object-fit: fill;
+}
+
+.carousel-main img {
+  height: 100vh;
+}
+
+.colImage img {
+  height: 100%; /* Gambar di kolom memiliki tinggi maksimum */
+  width: 100%; /* Untuk memenuhi lebar kolom */
+  object-fit: cover; /* Untuk memastikan gambar tetap proporsional */
+
+  border-radius: 10px;
+}
+
+.no-data-animation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh; /* Adjust height as needed */
+  text-align: center;
+}
+
+.sentiment-list {
+  margin-top: 20px;
+}
+.sentiment-item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.page-item {
+  margin: 0 5px;
+}
+.page-link {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  color: #007bff;
+  text-decoration: none;
+}
+.page-link:hover {
+  background-color: #f0f0f0;
+}
+.page-link.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+#drop-area {
+  width: 500px;
+  height: 300px;
+  background: rgb(255, 255, 255);
+  text-align: center;
+  border-radius: 20px;
+  display: block;
+}
+#img-view {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  border: 2px dashed #808a85;
+  background: rgb(247, 247, 247) #f7f8ff;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#img-view img {
+  width: 100px;
+}
+#img-view span {
+  display: block;
+  font-size: 12px;
+  color: #777;
+  margin-top: 15px;
+}
+
+.img-preview {
+  position: relative;
+  display: inline-block;
+  margin-right: 10px;
+}
+.img-preview img {
+  max-width: 100px;
+}
+.img-preview button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(50%, -50%);
+}
+
+.fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #0b5c18;
+  color: white;
+  text-align: center;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.fab:hover {
+  background-color: #07380f;
+}
+
+.car-image {
+  height: 200px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.button-icon {
+  height: 20px;
+  margin-right: 5px;
+}
+
+.bank-logos-container img {
+  width: 60px;
+  height: auto;
+  margin-right: 10px;
+  max-height: 80px; /* Limit maximum height for consistency */
+}
+
+@media (max-width: 768px) {
+  .carousel-item img {
+    height: 200px; /* Tinggi responsif untuk layar kecil */
+    object-fit: cover; /* Untuk memastikan gambar tetap proporsional */
+  }
+  .car-image {
+    height: 100px;
+  }
+}

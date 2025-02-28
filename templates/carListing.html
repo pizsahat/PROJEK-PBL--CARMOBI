@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include 'components/head.html' %}
+    <title>Car Listing</title>
+  </head>
+  <body>
+    {% include 'components/navbar.html' %} {% if request.args.get('message') %}
+    <script>
+      alert('{{ request.args.get("message") }}');
+    </script>
+    {% endif %}
+    <div class="container p-3">
+      <div class="d-md-flex d-block w-100 justify-content-between py-3">
+        <h3>Car Listing</h3>
+        <div class="input-group mb-3" style="max-width: 300px">
+          <input
+            type="text"
+            class="form-control"
+            id="searchInput"
+            placeholder="Cari mobil..."
+          />
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            id="searchButton"
+          >
+            Cari
+          </button>
+        </div>
+        {% if session.user %}
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-toggle="modal"
+          data-bs-target="{% if not is_premium_user() %}#paymentModal{% else %}#addCarModal{% endif %}"
+        >
+          {% if not is_premium_user() %}
+          <img
+            src="static/asset/premium.png"
+            alt="premium"
+            class="button-icon"
+          />
+          Upgrade to Premium {% else %} Add {% endif %}
+        </button>
+        {% endif %}
+      </div>
+      {% if message %}
+      <div
+        class="alert alert-primary alert-dismissible fade show mt-3"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endif %}
+
+      <hr />
+
+      <!-- User Car List -->
+      <div id="myCarListingsSection">
+        <h4>My Car Listings</h4>
+        <div id="userCarList" class="row">
+          <!-- User car items will be dynamically added here -->
+        </div>
+        <hr />
+      </div>
+
+      <!-- General Car List -->
+      <div>
+        <h4>General Car Listings</h4>
+
+        <div id="generalCarList" class="row">
+          <!-- General car items will be dynamically added here -->
+        </div>
+      </div>
+
+      <div
+        id="noDataAnimation"
+        class="no-data-animation"
+        style="display: flex; justify-content: center"
+      >
+        <dotlottie-player
+          src="/static/json/no-data.json"
+          background="transparent"
+          speed="1"
+          style="width: 300px; height: 300px"
+          loop
+          autoplay
+        ></dotlottie-player>
+      </div>
+    </div>
+
+    {% include 'components/footer.html' %}
+
+    <!-- Modal for Payment -->
+    <div
+      class="modal fade"
+      id="paymentModal"
+      tabindex="-1"
+      aria-labelledby="paymentModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="paymentModalLabel">
+              Upgrade to Premium
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>
+              To add car listings, you need to upgrade to a premium account.
+            </p>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">1 Month</h5>
+                    <p class="card-text">Upgrade for 1 month</p>
+                    <h2 class="card-text">Rp. 100.000,00</h2>
+                    <p class="card-text" style="text-decoration: line-through">
+                      Rp. 120.000,00
+                    </p>
+                    <a href="/upgrade?plan=1month" class="btn btn-primary">
+                      Upgrade for 1 Month
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">1 Year</h5>
+                    <p class="card-text">Upgrade for 1 year</p>
+                    <h2 class="card-text">Rp. 1.000.000,00</h2>
+                    <p class="card-text" style="text-decoration: line-through">
+                      Rp. 1.200.000,00
+                    </p>
+                    <a href="/upgrade?plan=1year" class="btn btn-primary">
+                      Upgrade for 1 Year
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="d-flex justify-content-center align-items-center bank-logos-container"
+            >
+              <img
+                src="https://statik.tempo.co/data/2019/04/23/id_836405/836405_720.jpg"
+                alt="BCA"
+              />
+              <img
+                src="https://www.bangkaindependent.com/wp-content/uploads/2022/04/4111342-bni-pangkal-pinang-kantor-cabang-kab-bangka-kepulauan-bangka-belitung.png"
+                alt="BNI"
+              />
+              <img
+                src="https://i0.wp.com/febi.uinsaid.ac.id/wp-content/uploads/2020/11/Logo-BRI-Bank-Rakyat-Indonesia-PNG-Terbaru.png?ssl=1"
+                alt="BRI"
+              />
+              <img
+                src="https://pbs.twimg.com/profile_images/1605130431829270533/pS8KH1cE_400x400.jpg"
+                alt="Mandiri"
+              />
+              <img
+                src="https://cdn.antaranews.com/cache/1200x800/2022/04/25/dana.jpg"
+                alt="Dana"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Adding Car -->
+    <div
+      class="modal fade"
+      id="addCarModal"
+      tabindex="-1"
+      aria-labelledby="addCarModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addCarModalLabel">
+              Tambah Car Listing
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form
+              method="POST"
+              action="/submitCarListing"
+              enctype="multipart/form-data"
+            >
+              <div class="mb-3">
+                <label for="model" class="form-label">Model Mobil</label>
+                <select class="form-select" id="model" name="model" required>
+                  <option value="" disabled selected>Pilih Model Mobil</option>
+                  <option value="Agya">Agya</option>
+                  <option value="Veloz">Avanza Veloz</option>
+                  <option value="Calya">Calya</option>
+                  <option value="Corolla">Corolla Cross</option>
+                  <option value="Fortuner">Fortuner</option>
+                  <option value="Innova">Innova</option>
+                  <option value="Raize">Raize</option>
+                  <option value="Rush">Rush</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="bahan_bakar" class="form-label"
+                  >Bahan Bakar Mobil</label
+                >
+                <select
+                  class="form-select"
+                  id="bahan_bakar"
+                  name="bahan_bakar"
+                  required
+                >
+                  <option value="" disabled selected>
+                    Pilih Bahan Bakar Mobil
+                  </option>
+                  <option value="Bensin">Bensin</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="Electric Vehicle">Electric Vehicle</option>
+                  <option value="Hybrid">Hybrid</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="tahun" class="form-label">Tahun Mobil</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="tahun"
+                  name="tahun"
+                  min="2000"
+                  placeholder="Contoh: 2021"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="kilometer" class="form-label"
+                  >Kilometer Mobil</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="kilometer"
+                  name="kilometer"
+                  min="1"
+                  placeholder="Contoh: 23102"
+                  oninput="formatPriceInput(this)"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="pajak" class="form-label">Pajak Mobil</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="pajak"
+                  name="pajak"
+                  min="0"
+                  step="1000"
+                  placeholder="Contoh: 3800000"
+                  oninput="formatPriceInput(this)"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="kmPerL" class="form-label">KM/L Mobil</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="kmPerL"
+                    name="kmPerL"
+                    min="0"
+                    placeholder="Contoh: 68.1"
+                    step="0.1"
+                    required
+                  />
+                  <button
+                    class="btn btn btn-secondary"
+                    type="button"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="jumlah mil yang ditempuh / jumlah galon bahan bakar yang digunakan"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      class="bi bi-info-circle"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"
+                      ></path>
+                      <path
+                        d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="cc" class="form-label">CC Mobil</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="cc"
+                    name="cc"
+                    placeholder="Contoh: 2.5"
+                    min="0"
+                    step="0.1"
+                    required
+                  />
+                  <button
+                    class="btn btn btn-secondary"
+                    type="button"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Masukkan CC sesuai yang ada di STNK anda dan dalam desimal"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      class="bi bi-info-circle"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"
+                      ></path>
+                      <path
+                        d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="transmisi" class="form-label"
+                  >Transmisi Mobil</label
+                >
+                <select
+                  class="form-select"
+                  id="transmisi"
+                  name="transmisi"
+                  required
+                >
+                  <option value="" disabled selected>
+                    Pilih Transmisi Mobil
+                  </option>
+                  <option value="Manual">Manual</option>
+                  <option value="Matic">Matic</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="carPrice" class="form-label">Harga</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="carPrice"
+                  name="carPrice"
+                  placeholder="Masukkan harga mobil"
+                  oninput="formatPriceInput(this)"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="carDescription" class="form-label">Deskripsi</label>
+                <textarea
+                  class="form-control"
+                  id="carDescription"
+                  name="carDescription"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label for="carImages1" class="form-label"
+                  >Gambar Tampak Depan</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="carImages1"
+                  name="carImages1"
+                  accept="image/*"
+                />
+              </div>
+              <div id="imagePreviewContainer1" class="d-flex flex-wrap"></div>
+              <div class="mb-3">
+                <label for="carImages2" class="form-label"
+                  >Gambar Tampak Belakang</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="carImages2"
+                  name="carImages2"
+                  accept="image/*"
+                />
+              </div>
+              <div id="imagePreviewContainer2" class="d-flex flex-wrap"></div>
+              <div class="mb-3">
+                <label for="carImages" class="form-label"
+                  >Gambar Tampak Dalam</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="carImages3"
+                  name="carImages3"
+                  accept="image/*"
+                />
+              </div>
+              <div id="imagePreviewContainer3" class="d-flex flex-wrap"></div>
+
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include 'components/scripts.html' %}
+
+    <script>
+      $(document).ready(function () {
+        function loadCarListings(searchQuery = "") {
+          $.ajax({
+            url: "/carListings",
+            type: "GET",
+            data: { search: searchQuery }, // Tambahkan data pencarian ke permintaan AJAX
+            success: function (response) {
+              const userCarList = $("#userCarList");
+              const generalCarList = $("#generalCarList");
+              const noDataAnimation = $("#noDataAnimation");
+              const myCarListingsSection = $("#myCarListingsSection");
+
+              userCarList.empty(); // Kosongkan daftar sebelumnya
+              generalCarList.empty(); // Kosongkan daftar sebelumnya
+
+              if (
+                response.user_listings.length === 0 &&
+                response.general_listings.length === 0
+              ) {
+                noDataAnimation.show();
+              } else {
+                noDataAnimation.hide();
+                // Tambahkan daftar mobil pengguna
+                if (response.user_listings.length === 0) {
+                  myCarListingsSection.hide();
+                } else {
+                  myCarListingsSection.show();
+                  response.user_listings.forEach((car) => {
+                    const carItem = createCarItem(car);
+                    userCarList.append(carItem);
+                  });
+                }
+                // Tambahkan daftar mobil umum
+                response.general_listings.forEach((car) => {
+                  const carItem = createCarItem(car);
+                  generalCarList.append(carItem);
+                });
+              }
+            },
+            error: function (error) {
+              alert("Gagal memuat daftar mobil.");
+            },
+          });
+        }
+
+        function createCarItem(car) {
+          const defaultImageURL =
+            "https://img.freepik.com/premium-vector/modern-flat-icon-landscape_203633-11062.jpg?w=740";
+          const carViews = car.views !== undefined ? car.views : 0;
+          const carImageURL =
+            car.imageURLs && car.imageURLs.length > 0
+              ? car.imageURLs[0]
+              : defaultImageURL;
+          return `
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card">
+                        <img src="${carImageURL}" class="card-img-top car-image" alt="Car Image">
+                        <div class="card-body">
+                            <h5 class="card-title">${
+                              car.model
+                            } ${car.tahun}</h5>
+                            <p class="card-text">
+                                <p class="card-text">Rp ${formatPrice(
+                                  car.carPrice
+                                )}</p>
+                                <a href="/carListings/${
+                                  car.id
+                                }" class="btn btn-primary mb-3" >See Detail</a>
+                                <div class = "d-flex align-items-center ">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                                    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                                  </svg>
+                                  <p class="ms-1 card-text">${carViews}x seen</p>
+                                </div>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-body-secondary">${
+                              car.timestamp
+                            }</small>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        // Load car listings on page load
+        loadCarListings();
+
+        // Tangani klik tombol pencarian
+        $("#searchButton").click(function () {
+          const searchQuery = $("#searchInput").val().trim();
+          loadCarListings(searchQuery);
+        });
+
+        // Tangani pencarian saat menekan tombol Enter
+        $("#searchInput").keypress(function (e) {
+          if (e.which === 13) {
+            // Jika tombol Enter ditekan
+            const searchQuery = $("#searchInput").val().trim();
+            loadCarListings(searchQuery);
+          }
+        });
+
+        $("#carImages1, #carImages2, #carImages3").on(
+          "change",
+          function (event) {
+            const files = event.target.files;
+            const imagePreviewContainerId = $(event.target)
+              .attr("id")
+              .replace("carImages", "imagePreviewContainer");
+            const imagePreviewContainer = $(`#${imagePreviewContainerId}`);
+            imagePreviewContainer.empty();
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                const imgPreview = `
+                <div class="img-preview">
+                  <img src="${e.target.result}" alt="Car Image">
+                  <button type="button" class="btn btn-danger btn-sm" onclick="removeImagePreview(this)">
+                    &times;
+                  </button>
+                </div>`;
+                imagePreviewContainer.append(imgPreview);
+              };
+              reader.readAsDataURL(file);
+            }
+          }
+        );
+      });
+
+      function removeImagePreview(button) {
+        $(button).closest(".img-preview").remove();
+      }
+    </script>
+  </body>
+</html>

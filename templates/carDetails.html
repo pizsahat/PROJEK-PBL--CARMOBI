@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include 'components/head.html' %}
+    <title>Car Listing Detail</title>
+    </head>
+  <body>
+    {% include 'components/navbar.html' %}
+
+    <div class="container p-3">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">Car Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-5">
+              <div
+                id="carImagesCarousel"
+                class="carousel slide mb-3"
+                data-bs-ride="carousel"
+              >
+              <div class="carousel-inner">
+                {% if car.imageURLs and car.imageURLs|length > 0 %}
+                    {% set index = 0 %}
+                    {% for imageURL in car.imageURLs %}
+                        <div class="carousel-item {% if index == 0 %}active{% endif %}">
+                            <img src="{{ imageURL }}" class="d-block w-100 rounded" alt="Car Image">
+                        </div>
+                        {% set index = index + 1 %}
+                    {% endfor %}
+                {% else %}
+                    <div class="carousel-item active">
+                        <img src="https://img.freepik.com/premium-vector/modern-flat-icon-landscape_203633-11062.jpg?w=740" class="d-block w-100" alt="Default Image">
+                    </div>
+                {% endif %}
+            </div>
+            
+                <button
+                  class="carousel-control-prev"
+                  type="button"
+                  data-bs-target="#carImagesCarousel"
+                  data-bs-slide="prev"
+                >
+                  <span
+                    class="carousel-control-prev-icon"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button
+                  class="carousel-control-next"
+                  type="button"
+                  data-bs-target="#carImagesCarousel"
+                  data-bs-slide="next"
+                >
+                  <span
+                    class="carousel-control-next-icon"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
+              </div>
+              <div class="d-flex ">
+                <div class="row">
+                  {% for imageURL in car.imageURLs %}
+                  <div class="col-4 colImage">
+                      <img src="{{ imageURL }}" class="img-fluid mb-2" alt="Car Image">
+                  </div>
+              {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-7 d-flex flex-column ">
+              <div class="mb-3">
+                <h2 class="card-title mt-md-0 mt-4">
+                  {{ car.model }} {{ car.tahun }}
+                </h2>
+                <p class="card-text">
+                  <strong>Uploaded:</strong> <span id="daysUploaded"></span><span id="uploadedTime"></span>
+                </p>
+              </div>
+              <div class="mb-3">
+                <p class="card-text">
+                  <strong>Description:</strong> {{ car.carDescription }}
+                </p>
+                <p class="card-text">
+                  <strong>Location:</strong> {{ user.address }}
+                </p>
+              </div class="mb-3">
+              <div class="d-flex flex-column">
+                <h1 class="card-text">Rp {{ car.carPrice }}</h1>
+                {% if session.get('user') and session['user'].replace('.', ',') == car.user_email %}
+                <button
+                  type="button"
+                  class="btn btn-primary mb-2"
+                  data-bs-toggle="modal"
+                  data-bs-target="#addCarModal"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger mb-2"
+                  data-bs-toggle="modal"
+                  data-bs-target="#deleteModal"
+                >
+                  Delete
+                </button>
+                {% else %}
+                <a href="https://api.whatsapp.com/send/?phone={{ user.whatsApp }}&text&type=phone_number&app_absent=0" class="btn btn-success mb-2"
+                  >Contact Seller</a
+                >
+                {% endif %}
+  
+              </div>
+            </div>
+            <hr class="mt-3" />
+            <div class="row">
+              <h2 class="card-title">Features:</h2>
+              <div class="col-6">
+                <p><strong>bahan bakar</strong> : {{ car.bahan_bakar }}</p>
+                <p><strong>transmisi</strong> : {{ car.transmisi }}</p>
+                <p><strong>pajak</strong> : Rp {{ car.pajak }}</p>
+              </div>
+              <div class="col-6">
+                <p><strong>KM/L</strong> : {{ car.kmPerL }}</p>
+                <p><strong>Kilometer</strong> : {{ car.kilometer }}</p>
+                <p><strong>cc</strong> : {{ car.cc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center mb-2">
+              <img
+                class="border rounded-circle"
+                style="width: 50px; height: 50px; object-fit: cover"
+                src="{{ user.profile_image_url or 'https://t3.ftcdn.net/jpg/03/58/90/78/360_F_358907879_Vdu96gF4XVhjCZxN2kCG0THTsSQi8IhT.jpg' }}"
+              />
+              <p class="card-text ms-2">{{ user.full_name }}</p>
+            </div>
+            <p class="card-text">{{ car.timestamp }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="fab" id="fabPredictPrice">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16">
+        <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73z"/>
+      </svg>
+    </div>
+
+
+
+    <div
+      class="modal fade"
+      id="deleteModal"
+      tabindex="-1"
+      aria-labelledby="deleteModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete this car listing?
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <form action="/delete/{{ car.id }}">
+              <input type="hidden" />
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+    class="modal fade"
+    id="predictPriceModal"
+    tabindex="-1"
+    aria-labelledby="predictPriceModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="predictPriceModalLabel">Predicted Car Price</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <p class="mt-3" id="result"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    <div
+      class="modal fade"
+      id="addCarModal"
+      tabindex="-1"
+      aria-labelledby="addCarModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addCarModalLabel">
+              Edit Car Listing
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form
+              method="POST"
+              action="/edit/{{ car.id }}"
+              enctype="multipart/form-data"
+            >
+              <div class="mb-3">
+                <label for="model" class="form-label">Model Mobil</label>
+                <select class="form-select" id="model" name="model" required>
+                  <option value="" disabled selected>Pilih Model Mobil</option>
+                  <option value="Agya" {% if car.model == 'Agya' %} selected {% endif %}>Agya</option>
+                  <option value="Veloz" {% if car.model == 'Veloz' %} selected {% endif %}>Avanza Veloz</option>
+                  <option value="Calya" {% if car.model == 'Calya' %} selected {% endif %}>Calya</option>
+                  <option value="Corolla" {% if car.model == 'Corolla' %} selected {% endif %}>Corolla Cross</option>
+                  <option value="Fortuner" {% if car.model == 'Fortuner' %} selected {% endif %}>Fortuner</option>
+                  <option value="Innova" {% if car.model == 'Innova' %} selected {% endif %}>Innova</option>
+                  <option value="Raize" {% if car.model == 'Raize' %} selected {% endif %}>Raize</option>
+                  <option value="Rush" {% if car.model == 'Rush' %} selected {% endif %}>Rush</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="bahan_bakar" class="form-label"
+                  >Bahan Bakar Mobil</label
+                >
+                <select
+                  class="form-select"
+                  id="bahan_bakar"
+                  name="bahan_bakar"
+                  required
+                >
+                  <option value="" disabled selected>
+                    Pilih Bahan Bakar Mobil
+                  </option>
+                  <option value="Bensin" {% if car.bahan_bakar == 'Bensin' %} selected {% endif %}>Bensin</option>
+                  <option value="Diesel" {% if car.bahan_bakar == 'Diesel' %} selected {% endif %}>Diesel</option>
+                  <option value="Electric Vehicle" {% if car.bahan_bakar == 'Electric Vehicle' %} selected {% endif %}>Electric Vehicle</option>
+                  <option value="Hybrid" {% if car.bahan_bakar == 'Hybrid' %} selected {% endif %}>Hybrid</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="tahun" class="form-label">Tahun Mobil</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="tahun"
+                  name="tahun"
+                  min="2000"
+                  placeholder="Contoh: 2021"
+                  value="{{ car.tahun }}"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="kilometer" class="form-label"
+                  >Kilometer Mobil</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="kilometer"
+                  name="kilometer"
+                  min="1"
+                  placeholder="Contoh: 23102"
+                  value="{{car.kilometer}}"
+                  oninput="formatPriceInput(this)"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="pajak" class="form-label">Pajak Mobil</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="pajak"
+                  name="pajak"
+                  min="0"
+                  step="1000"
+                  value="{{car.pajak}}"
+                  placeholder="Contoh: 3800000"
+                  oninput="formatPriceInput(this)"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="kmPerL" class="form-label">KM/L Mobil</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="kmPerL"
+                    name="kmPerL"
+                    min="0"
+                    value="{{ car.kmPerL}}"
+                    placeholder="Contoh: 68.1"
+                    step="0.1"
+                    required
+                  />
+                  <button
+                    class="btn btn btn-secondary"
+                    type="button"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="jumlah mil yang ditempuh / jumlah galon bahan bakar yang digunakan"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      class="bi bi-info-circle"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"
+                      ></path>
+                      <path
+                        d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="cc" class="form-label">CC Mobil</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="cc"
+                    name="cc"
+                    placeholder="Contoh: 2.5"
+                    min="0"
+                    value="{{ car.cc}}"
+                    step="0.1"
+                    required
+                  />
+                  <button
+                    class="btn btn btn-secondary"
+                    type="button"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Masukkan CC sesuai yang ada di STNK anda dan dalam desimal"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      class="bi bi-info-circle"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"
+                      ></path>
+                      <path
+                        d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="transmisi" class="form-label"
+                  >Transmisi Mobil</label
+                >
+                <select
+                  class="form-select"
+                  id="transmisi"
+                  name="transmisi"
+                  required
+                >
+                  <option value="" disabled selected>
+                    Pilih Transmisi Mobil
+                  </option>
+                  <option value="Manual" {% if car.transmisi == 'Manual' %} selected {% endif %}>Manual</option>
+                  <option value="Matic" {% if car.transmisi == 'Matic' %} selected {% endif %}>Matic</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="carPrice" class="form-label">Harga</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="carPrice"
+                  name="carPrice"
+                  placeholder="Masukkan harga mobil"
+                  value="{{ car.carPrice }}"
+                  oninput="formatPriceInput(this)"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="carDescription" class="form-label">Deskripsi</label>
+                <textarea
+                  class="form-control"
+                  id="carDescription"
+                  name="carDescription"
+                  rows="3"
+                  required
+                >{{ car.carDescription }}</textarea>
+              </div>
+
+              <div class="mb-3">
+                <label for="carImages1" class="form-label"
+                  >Gambar Tampak Depan</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="carImages1"
+                  name="carImages1"
+                  accept="image/*"
+                />
+              </div>
+              <div id="imagePreviewContainer1" class="d-flex flex-wrap"></div>
+              <div class="mb-3">
+                <label for="carImages2" class="form-label"
+                  >Gambar Tampak Belakang</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="carImages2"
+                  name="carImages2"
+                  accept="image/*"
+                />
+              </div>
+              <div id="imagePreviewContainer2" class="d-flex flex-wrap"></div>
+              <div class="mb-3">
+                <label for="carImages" class="form-label"
+                  >Gambar Tampak Dalam</label
+                >
+                <input
+                  type="file"
+                  class="form-control"
+                  id="carImages3"
+                  name="carImages3"
+                  accept="image/*"
+                />
+              </div>
+              <div id="imagePreviewContainer3" class="d-flex flex-wrap"></div>
+
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Ambil timestamp dari server yang disimpan dalam variabel 'carTimestamp'
+        var carTimestamp = "{{ car.timestamp }}"; // Sesuaikan dengan cara Anda mendapatkan timestamp
+    
+        // Ubah timestamp menjadi tanggal
+        var dateUploaded = new Date(carTimestamp);
+        var now = new Date();
+    
+        // Hitung selisih waktu dalam milidetik
+        var timeDiff = now.getTime() - dateUploaded.getTime();
+    
+        // Hitung selisih hari
+        var daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+    
+        // Jika kurang dari 1 hari, hitung jam dan menit
+        if (daysDiff < 1) {
+          var hoursDiff = Math.floor(timeDiff / (1000 * 3600));
+          var minutesDiff = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
+          
+          // Tampilkan informasi jam dan menit
+          var uploadedTimeElement = document.getElementById("uploadedTime");
+          if (uploadedTimeElement) {
+            uploadedTimeElement.textContent = hoursDiff + " jam " + minutesDiff + " menit yang lalu";
+          }
+        } else {
+          // Jika lebih dari atau sama dengan 1 hari, tampilkan informasi dalam hari
+          var daysUploadedElement = document.getElementById("daysUploaded");
+          if (daysUploadedElement) {
+            daysUploadedElement.textContent = daysDiff + " hari yang lalu";
+          }
+        }
+      });
+    </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Event listener untuk FAB
+    document.getElementById("fabPredictPrice").addEventListener("click", function() {
+      // Ajax request untuk memprediksi harga mobil
+      let initialPajakValue = "{{ car.pajak }}"; 
+      let initialKilometerValue = "{{ car.kilometer }}"; 
+
+      // Hapus titik (.) dan koma (,) dari nilai awal
+      let pajakValue = initialPajakValue.replace(/[.,]/g, '');
+      let kilometerValue = initialKilometerValue.replace(/[.,]/g, '');
+
+      // Konversi ke tipe data number
+      let numericPajakValue = parseInt(pajakValue);
+      let numericKilometerValue = parseInt(kilometerValue);
+      let tahun = "{{ car.tahun }}";
+      let kilometer = numericKilometerValue;
+      let pajak = numericPajakValue;
+      let kmPerL = parseFloat("{{ car.kmPerL }}");
+      mpg = kmPerLToMpg(kmPerL);
+      let cc = "{{ car.cc }}";
+      let transmisi = "{{ car.transmisi }}";
+      let bahan_bakar = "{{ car.bahan_bakar }}";
+      let model = "{{ car.model }}";
+      let transmisiBinary = transmisi === 'Manual' ? 0 : transmisi === 'Matic' ? 1 : -1;
+        let bahan_bakarValue;
+      switch (bahan_bakar) {
+          case "Bensin":
+              bahan_bakarValue = [0, 0, 0];
+              break;
+          case "Diesel":
+              bahan_bakarValue = [1, 0, 0];
+              break;
+          case "Electric Vehicle":
+              bahan_bakarValue = [0, 1, 0];
+              break;
+          case "Hybrid":
+              bahan_bakarValue = [0, 0, 1];
+              break;
+          default:
+              bahan_bakarValue = [0, 0, 0]; // Default jika tidak ada yang sesuai
+              break;
+      }
+
+      let modelValue;
+      switch (model) {
+          case "Agya":
+              modelValue = [0, 0, 0, 0, 0, 0, 0];
+              break;
+          case "Avanza Veloz":
+              modelValue = [1, 0, 0, 0, 0, 0, 0];
+              break;
+          case "Calya":
+              modelValue = [0, 1, 0, 0, 0, 0, 0];
+              break;
+          case "Corolla":
+              modelValue = [0, 0, 1, 0, 0, 0, 0];
+              break;
+          case "Fortuner":
+              modelValue = [0, 0, 0, 1, 0, 0, 0];
+              break;
+          case "Innova":
+              modelValue = [0, 0, 0, 0, 1, 0, 0];
+              break;
+          case "Raize":
+              modelValue = [0, 0, 0, 0, 0, 1, 0];
+              break;
+          case "Rush":
+              modelValue = [0, 0, 0, 0, 0, 0, 1];
+              break;
+          default:
+              modelValue = [0, 0, 0, 0, 0, 0, 0]; // Default jika tidak ada yang sesuai
+              break;
+      }
+
+
+      let features = [tahun, pajak, mpg, cc, transmisiBinary, ...bahan_bakarValue, ...modelValue].concat([Math.log1p(kilometer)]);
+
+      $.ajax({
+        url: "/scanPrice",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ features: features }),
+        success: function (response) {
+          let rupiah = new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+          }).format(response.prediction[0]);
+          $("#result").text("The system predicts the price of a car worth " + rupiah);
+
+          // Tampilkan modal setelah mendapatkan prediksi
+          $("#predictPriceModal").modal("show");
+        },
+        error: function (response) {
+          if (response.status === 403) {
+            $("#result").text("");
+            $("#error-message").text(
+              "Silakan login untuk melanjutkan prediksi lebih lanjut."
+            );
+            $("#error-message").show();
+          } else if (response.status === 400) {
+            $("#result").text("");
+            $("#error-message").text(
+              "Kuota prediksi sudah habis. Silakan coba lagi nanti."
+            );
+            $("#error-message").show();
+          } else {
+            console.error("Error:", response);
+          }
+        },
+      });
+    });
+  });
+</script>
+
+ 
+    
+
+    {% include 'components/footer.html' %} {% include 'components/scripts.html'
+    %}
+  </body>
+</html>

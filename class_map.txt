@@ -1,0 +1,9 @@
+{
+    0: 'agya 2013', 1: 'agya 2017', 2: 'agya 2020', 3: 'agya 2023',
+    4: 'calya 2016', 5: 'calya 2019', 6: 'calya 2022',
+    7: 'corolla 1996', 8: 'corolla 2006', 9: 'corolla 2014', 10: 'corolla 2019',
+    11: 'fortuner 2005', 12: 'fortuner 2012', 13: 'fortuner 2016', 14: 'fortuner 2020',
+    15: 'innova 2010', 16: 'innova 2015', 17: 'innova 2018',
+    18: 'rush 2006', 19: 'rush 2015', 20: 'rush 2019',
+    21: 'veloz 2015', 22: 'veloz 2019', 23: 'veloz 2022'
+}

@@ -1,0 +1,157 @@
+<!-- login.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    {% include 'components/head.html' %}
+    <title>Login Page</title>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row" style="height: 100vh">
+        <div class="col-md-6 d-none d-md-flex justify-content-center">
+          <div class="container">
+            <dotlottie-player
+              src="https://lottie.host/36d6a03d-f5b7-4901-9da6-4af4291d5fc8/YQTIcuBKht.json"
+              background="transparent"
+              speed="1"
+              style="width: 100%; height: 100%"
+              loop
+              autoplay
+            ></dotlottie-player>
+          </div>
+        </div>
+        <div
+          class="col-md-6 d-flex align-items-center justify-content-center bg-success p-2 text-white bg-opacity-75 rounded-start-5"
+        >
+          <div class="container py-4 px-4">
+            <div class="row">
+              <h1>Login</h1>
+              {% if login_error %}
+              <div
+                class="alert alert-danger alert-dismissible fade show"
+                role="alert"
+              >
+                {{ login_error }}
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                  aria-label="Close"
+                ></button>
+              </div>
+              {% endif %}
+              <form action="/login" method="POST">
+                <div class="input-group mb-3">
+                  <input
+                    type="email"
+                    class="form-control"
+                    placeholder="Email Address"
+                    aria-label="email"
+                    id="email"
+                    name="email"
+                  />
+                </div>
+                <div class="input-group mb-3">
+                  <input
+                    type="password"
+                    class="form-control"
+                    placeholder="Password"
+                    aria-label="Password"
+                    id="password"
+                    name="password"
+                  />
+                </div>
+                <div class="d-grid py-2">
+                  <button type="submit" value="Login" class="btn btn-primary">
+                    Login
+                  </button>
+                </div>
+                <div class="d-flex justify-content-between py-2">
+                  <a
+                    href="#"
+                    class="text-white"
+                    data-bs-toggle="modal"
+                    data-bs-target="#forgotPasswordModal"
+                    >Forgot Password?</a
+                  >
+                  <a href="/register" class="text-white">Create Account</a>
+                </div>
+              </form>
+            </div>
+            <!-- Alert untuk pesan reset password -->
+            {% if reset_success %}
+            <div
+              class="alert alert-success alert-dismissible fade show mt-3"
+              role="alert"
+            >
+              Password reset email sent. Check your email inbox.
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+            {% endif %} {% if error_message %}
+            <div
+              class="alert alert-danger alert-dismissible fade show mt-3"
+              role="alert"
+            >
+              Failed to send password reset email: {{ error_message }}
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Forgot Password -->
+    <div
+      class="modal fade"
+      id="forgotPasswordModal"
+      tabindex="-1"
+      aria-labelledby="forgotPasswordModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="forgotPasswordModalLabel">
+              Forgot Password?
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form action="/forgot-password" method="POST">
+              <div class="mb-3">
+                <label for="forgotEmail" class="form-label"
+                  >Enter your email address:</label
+                >
+                <input
+                  type="email"
+                  class="form-control"
+                  id="forgotEmail"
+                  name="forgotEmail"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% include 'components/scripts.html' %}
+  </body>
+</html>
